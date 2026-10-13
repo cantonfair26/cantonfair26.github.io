@@ -4,29 +4,18 @@
 'use strict';
 const $ = (id) => document.getElementById(id);
 
-/* iPhone instalado: alguns iOS informam ao app uma altura menor que a tela (sobra uma faixa embaixo).
-   Só age no modo app instalado e só quando a diferença é a de uma barra (até 140 px). */
+/* iPhone instalado: algumas versões do iOS entregam ao app uma área 59 px menor que a tela e deixam uma faixa
+   embaixo onde não dá para desenhar. Nesse caso a faixa recebe a cor do menu, para parecer parte dele. */
 const STANDALONE = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 function ajustaAltura() {
-  const r = document.documentElement;
   const retrato = innerHeight >= innerWidth;
   const alt = retrato ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
   const gap = alt - innerHeight;
-  if (STANDALONE() && gap > 0 && gap <= 140) { r.style.setProperty('--appH', alt + 'px'); r.style.setProperty('--gap', gap + 'px'); }
-  else { r.style.removeProperty('--appH'); r.style.removeProperty('--gap'); }
+  document.documentElement.classList.toggle('curto', STANDALONE() && gap > 0 && gap <= 140);
 }
 ajustaAltura();
 addEventListener('resize', () => setTimeout(ajustaAltura, 60));
 addEventListener('orientationchange', () => setTimeout(ajustaAltura, 300));
-function diagnostico() {
-  const cs = getComputedStyle(document.documentElement);
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;left:8px;right:8px;top:45%;z-index:99;background:rgba(0,0,0,.85);color:#fff;font:13px/1.5 monospace;padding:12px;border-radius:8px';
-  t.textContent = 'standalone=' + navigator.standalone + ' modo=' + (matchMedia('(display-mode: standalone)').matches ? 'app' : 'navegador') +
-    ' | tela=' + screen.width + 'x' + screen.height + ' | janela=' + innerWidth + 'x' + innerHeight +
-    ' | ajuste=' + (cs.getPropertyValue('--appH') || 'nenhum') + ' | v10';
-  document.body.appendChild(t); setTimeout(() => t.remove(), 12000);
-}
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const num = (v) => { const n = parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')); return isNaN(n) ? null : n; };
 const brl = (v) => (v == null || v === '' || isNaN(v)) ? '' : v >= 1e6 ? 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mi' : 'R$ ' + Math.round(v / 1e3).toLocaleString('pt-BR') + ' mil';
@@ -1063,7 +1052,7 @@ async function baixaImagens() { const r = await api('imagens', {}); S.img = r.pa
 let loginEl = null;
 function mostraLogin(msg) {
   if (loginEl) loginEl.remove();
-  loginEl = document.createElement('div'); loginEl.className = 'login';
+  loginEl = document.createElement('div'); loginEl.className = 'login'; document.documentElement.classList.add('nologin');
   const passo1 = () => {
     loginEl.innerHTML = `<div class="k">WESTWING · GUANGZHOU</div><div class="rule"></div><h1>Canton Fair</h1><div class="y">2026</div>
      <p>${msg ? esc(msg) : 'Entre com seu e-mail da Westwing. Vamos mandar um código de 6 dígitos para o seu e-mail.'}</p>
@@ -1093,7 +1082,7 @@ function mostraLogin(msg) {
         S.token = r.token; S.email = r.email; await kvSet('token', S.token); await kvSet('email', S.email);
         loginEl.innerHTML = `<div class="k">WESTWING · GUANGZHOU</div><div class="rule"></div><h1>Canton Fair</h1><div class="y">2026</div>
          <p><b>Preparando o roteiro…</b><br>Baixando os projetos e as fotos da buylist para o app funcionar sem internet. Leva alguns segundos e só acontece no primeiro acesso.</p>`;
-        await inicia(); if (loginEl) { loginEl.remove(); loginEl = null; }
+        await inicia(); if (loginEl) { loginEl.remove(); loginEl = null; document.documentElement.classList.remove('nologin'); }
       } catch (e) { x.textContent = e.servidor ? e.message : 'Não consegui conectar. Tente de novo.'; b.disabled = false; b.textContent = 'Entrar'; }
     };
     loginEl.querySelector('#lgB').onclick = entrar;
@@ -1104,7 +1093,6 @@ function mostraLogin(msg) {
 
 /* ================= início ================= */
 async function inicia() {
-  if (S.email === ADMIN && !window.__diag) { window.__diag = 1; setTimeout(diagnostico, 1200); }
   if (!S.projetos.length) {
     bar('Canton Fair 2026', false); $('nav').classList.add('hidden');
     $('scr').innerHTML = '<div class="load"><b>Preparando o roteiro</b>Baixando os projetos e as fotos da buylist para funcionar sem internet. Só acontece na primeira vez.</div>';
