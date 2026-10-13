@@ -380,3 +380,6 @@ html.curto{--bot:0px;background:#fff}
 html.curto body{background:#fff}
 html.curto.nologin,html.curto.nologin body{background:var(--tiffany)}
 html.curto .bar{padding-top:calc(var(--top) + 18px);min-height:calc(var(--top) + 68px)}
+/* iPhone instalado: o iOS escolhe a cor do relógio e o esmaecido do topo pelo esquema de cores da página.
+   Esquema escuro = relógio branco e esmaecido escuro, que some sobre a barra vermelha. */
+html.curto{color-scheme:dark}
