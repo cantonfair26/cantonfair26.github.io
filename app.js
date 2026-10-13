@@ -169,10 +169,10 @@ function vHome() {
     const subs = new Set(ps.map((p) => p.Subcategoria)).size; const ach = prods.filter((p) => p.Time === t).length;
     return `<button class="tile" data-time="${esc(t)}">${im ? `<img src="${im}" alt="${esc(t)}">` : `<img alt="${esc(t)}">`}
      <div class="prog"><i style="width:${ps.length ? Math.round(feitos / ps.length * 100) : 0}%"></i></div>
-     <div class="mini"><span>${ach} achado${ach !== 1 ? 's' : ''}</span><span>${subs} subcategorias</span></div></button>`;
+     <div class="mini"><span>${ach} produto${ach !== 1 ? 's' : ''}</span><span>${subs} subcategorias</span></div></button>`;
   }).join('');
   const corpo = st.q.trim() ? resultados() : `<div class="hello"><b>Roteiro da feira</b>${S.projetos.length} projetos em ${T.length} times</div>
-   <div class="sec">Times<span>${comAchado} de ${S.projetos.length} com produto achado</span></div><div class="tiles">${tiles}</div><div style="height:80px"></div>`;
+   <div class="sec">Times<span>${comAchado} de ${S.projetos.length} com produto</span></div><div class="tiles">${tiles}</div><div style="height:80px"></div>`;
   return `${capa ? `<img class="banner" src="${capa}" alt="Canton Fair 2026">` : '<div class="banner"></div>'}
    <label class="search">${I.search}<input id="q" type="search" placeholder="Buscar projeto, coleção ou tipo" value="${esc(st.q)}" autocomplete="off" enterkeyhint="search"></label>
    <div id="res">${corpo}</div>${fab()}`;
@@ -180,7 +180,7 @@ function vHome() {
 function resultados() {
   const q = st.q.trim().toLowerCase(); const cont = contaPorProjeto();
   const r = S.projetos.filter((p) => [p.Projeto, p['Coleção'], p.Subcategoria, p.Tipo, p.Time].join(' ').toLowerCase().includes(q));
-  return `<div class="sec">Resultados<span>${r.length} projeto${r.length !== 1 ? 's' : ''}</span></div>${r.length ? `<div class="list">${r.map((p) => projRow(p, cont)).join('')}</div>` : '<div class="empty">Nada encontrado. Use o botão Produto para registrar um achado novo.</div>'}<div style="height:80px"></div>`;
+  return `<div class="sec">Resultados<span>${r.length} projeto${r.length !== 1 ? 's' : ''}</span></div>${r.length ? `<div class="list">${r.map((p) => projRow(p, cont)).join('')}</div>` : '<div class="empty">Nada encontrado. Use o botão Produto para registrar um produto novo.</div>'}<div style="height:80px"></div>`;
 }
 function vTime(t) {
   const cont = contaPorProjeto(); const g = {};
@@ -195,13 +195,13 @@ function vProjeto(id) {
     <div class="g"><div><small>FOB alvo</small>${p.FOB_Alvo ? `<b class="num">${esc(p.FOB_Alvo)}</b>` : '<span class="todo">A preencher</span>'}</div>
     <div><small>MOQ alvo</small>${p.MOQ_Alvo !== '' && p.MOQ_Alvo != null ? `<b class="num">${esc(p.MOQ_Alvo)} pcs</b>` : '<span class="todo">A preencher</span>'}</div>
     <div><small>CMV 12M</small><b class="num">${num(p.CMV_12M) ? brl(num(p.CMV_12M)) : 'Sem dado'}</b></div><div><small>SKUs</small><b class="num">${p.SKUs !== '' && p.SKUs != null ? esc(p.SKUs) : 'Sem dado'}</b></div></div></div>
-   ${LARGO() && ps.length > 1 ? `<div class="duas"><button class="addp" data-go="novoproj">Adicionar produto encontrado</button><button class="addp out" data-go="comparar">Comparar os ${ps.length} achados</button></div>` : '<button class="addp" data-go="novoproj">Adicionar produto encontrado</button>'}
+   ${LARGO() && ps.length > 1 ? `<div class="duas"><button class="addp" data-go="novoproj">Adicionar produto encontrado</button><button class="addp out" data-go="comparar">Comparar os ${ps.length} produtos</button></div>` : '<button class="addp" data-go="novoproj">Adicionar produto encontrado</button>'}
    <div class="sec">Produtos encontrados na feira<span>${ps.length}</span></div>
    ${ps.map((x, i) => rowProduto(x, { semProjeto: true, melhor: i === 0 && ps.length > 1 })).join('') || '<div class="empty">Nenhum ainda.</div>'}<div style="height:24px"></div></div></div>`;
 }
 function rowProduto(x, o) {
   o = o || {}; const p = proj(x.ID_Projeto); const f = forn(x.ID_Fornecedor);
-  const titulo = o.semProjeto ? (f ? f.Empresa : 'Fornecedor') : (p ? p.Projeto : 'Achado livre · ' + (x.Subcategoria || x.Time || ''));
+  const titulo = o.semProjeto ? (f ? f.Empresa : 'Fornecedor') : (p ? p.Projeto : 'Produto livre · ' + (x.Subcategoria || x.Time || ''));
   const linha2 = o.semProjeto ? `${usd(x.FOB_USD)}${x.MOQ ? ' · MOQ ' + esc(x.MOQ) : ''}` : esc(f ? f.Empresa : '');
   const linha3 = o.semProjeto ? (x.Interesse ? 'Interesse ' + esc(String(x.Interesse).toLowerCase()) : '') + (x.Anotacoes ? (x.Interesse ? ' · ' : '') + esc(x.Anotacoes) : '') : `${usd(x.FOB_USD)}${x.MOQ ? ' · MOQ ' + esc(x.MOQ) : ''}`;
   return `<button class="row" data-prod="${esc(x.ID_Produto)}">${x.thumb ? `<img class="th" src="${x.thumb}" alt="">` : ph('th')}<div class="t"><div class="t1">${esc(titulo)}</div>
@@ -209,7 +209,7 @@ function rowProduto(x, o) {
    ${o.melhor ? '<span class="cnt has">Melhor FOB</span>' : ''}${!o.semProjeto && !x.ID_Projeto ? '<span class="chip free">Fora da buylist</span>' : ''}${x._pend ? '<span class="chip fila">Na fila</span>' : ''}</div></button>`;
 }
 function vProdutos() {
-  const ps = todosProdutos(); if (!ps.length) return '<div class="empty">Nenhum produto registrado ainda. Toque em <b>Produto</b> para registrar o primeiro achado.</div>' + fab();
+  const ps = todosProdutos(); if (!ps.length) return '<div class="empty">Nenhum produto registrado ainda. Toque em <b>Produto</b> para registrar o primeiro produto.</div>' + fab();
   return timesOrdenados().map((t) => { const a = ps.filter((p) => p.Time === t); return a.length ? `<div class="ghead">${esc(t)}<span>${a.length}</span></div><div class="list">${a.map((x) => rowProduto(x)).join('')}</div>` : ''; }).join('') + '<div style="height:90px"></div>' + fab();
 }
 function podeApagar(x) { return !!x && (x._pend || S.email === ADMIN || String(x.Registrado_Por || '').toLowerCase() === S.email); }
@@ -257,7 +257,7 @@ function vProduto(id) {
   const fld = (l, v, data) => `<div class="field" ${data || ''}><div class="l">${l}</div><div class="v ${v ? '' : 'muted'}">${v || 'Não informado'}</div></div>`;
   const alvo = faixaAlvo(p); const fob = num(x.FOB_USD);
   return `<div class="split"><div class="sl">${galeria(slotsProduto(x), 'Sem foto')}</div><div class="sr">
-   <div class="hero"><div class="k">${esc([x.Time, x.Subcategoria].filter(Boolean).join(' · '))}</div><div class="v">${esc(p ? p.Projeto : 'Achado livre')}</div>
+   <div class="hero"><div class="k">${esc([x.Time, x.Subcategoria].filter(Boolean).join(' · '))}</div><div class="v">${esc(p ? p.Projeto : 'Produto livre')}</div>
     <div class="g"><div><small>FOB</small><b class="num">${usd(fob)}</b></div><div><small>MOQ</small><b class="num">${x.MOQ !== '' && x.MOQ != null ? esc(x.MOQ) + ' pcs' : '<span class="todo">Não informado</span>'}</b></div>
     ${alvo ? `<div><small>FOB alvo</small><b class="num">${esc(p.FOB_Alvo)}</b></div>` : ''}<div><small>Interesse</small><b>${esc(x.Interesse || 'Não informado')}</b></div></div></div>
    ${fld('Fornecedor', f ? esc(f.Empresa) : '', f ? `data-forn="${esc(f.ID_Fornecedor)}" role="button"` : '')}
@@ -426,10 +426,10 @@ function renderLargo() {
   const vazio = (txt) => `<div class="vazio">${txt}</div>`;
   const dois = (lista, det, txt) => `<div class="pane lista" id="pl">${lista}</div><div class="pane det" id="pd">${det || vazio(txt)}</div>`;
   if (v.v === 'home') h = `<div class="pane uno" id="pu">${vHome()}</div>`;
-  else if (v.v === 'time') { t = v.time; h = dois(vTime(v.time), v.sel && proj(v.sel) ? vProjeto(v.sel) : '', 'Escolha um projeto da lista para ver a referência e os achados.'); }
+  else if (v.v === 'time') { t = v.time; h = dois(vTime(v.time), v.sel && proj(v.sel) ? vProjeto(v.sel) : '', 'Escolha um projeto da lista para ver a referência e os produtos.'); }
   else if (v.v === 'projeto') { const p = proj(v.id); t = p ? p.Projeto : 'Projeto'; h = `<div class="pane uno" id="pu">${vProjeto(v.id)}</div>`; }
   else if (v.v === 'produtos') { t = 'Produtos'; h = dois(vProdutos(), v.sel ? vProdutoLargo(v.sel, false) : '', 'Escolha um produto da lista.'); }
-  else if (v.v === 'produto') { const x = todosProdutos().find((p) => p.ID_Produto === v.id); const p = x && proj(x.ID_Projeto); t = (p ? p.Projeto : 'Achado livre') + (x && forn(x.ID_Fornecedor) ? ' · ' + forn(x.ID_Fornecedor).Empresa : ''); h = `<div class="pane uno" id="pu">${vProdutoLargo(v.id, true)}</div>`; }
+  else if (v.v === 'produto') { const x = todosProdutos().find((p) => p.ID_Produto === v.id); const p = x && proj(x.ID_Projeto); t = (p ? p.Projeto : 'Produto livre') + (x && forn(x.ID_Fornecedor) ? ' · ' + forn(x.ID_Fornecedor).Empresa : ''); h = `<div class="pane uno" id="pu">${vProdutoLargo(v.id, true)}</div>`; }
   else if (v.v === 'forn') { t = 'Fornecedores'; h = dois(vFornecedores(), v.sel ? vFornecedor(v.sel) : '', 'Escolha um fornecedor.'); }
   else if (v.v === 'fornecedor') { const f = forn(v.id); t = f ? f.Empresa : 'Fornecedor'; h = `<div class="pane uno" id="pu">${vFornecedor(v.id)}</div>`; }
   else if (v.v === 'comparar') { const p = proj(v.id); t = 'Comparar · ' + (p ? p.Projeto : ''); h = `<div class="pane uno" id="pu">${vComparar(v.id)}</div>`; }
@@ -459,7 +459,7 @@ function vProdutoLargo(id, lado) {
   const an = s ? anotacaoDe(id, s.k) : null; const mostra = an && !v.semAnot;
   const ps = p ? prodsDoProjeto(p.ID_Projeto) : []; const fob = num(x.FOB_USD);
   const ord = ps.filter((y) => num(y.FOB_USD) != null).sort((a, b) => num(a.FOB_USD) - num(b.FOB_USD)); const pos = ord.findIndex((y) => y.ID_Produto === id);
-  const comp = ps.length > 1 && pos >= 0 ? (pos === 0 ? `<b style="color:#A5D6A7">Melhor FOB de ${ps.length}</b>` : `<b>${pos + 1}º menor FOB de ${ps.length}</b>`) : '<b>Único achado</b>';
+  const comp = ps.length > 1 && pos >= 0 ? (pos === 0 ? `<b style="color:#A5D6A7">Melhor FOB de ${ps.length}</b>` : `<b>${pos + 1}º menor FOB de ${ps.length}</b>`) : '<b>Único produto</b>';
   const favs = favoritosDe(x); const meu = favs.includes(S.email);
   const pags = paginasTodas().filter((g) => g.ID_Produto === id);
   const fld = (l, val, data) => `<div class="field" ${data || ''}><div class="l">${l}</div><div class="v ${val ? '' : 'muted'}">${val || 'Não informado'}</div></div>`;
@@ -469,10 +469,10 @@ function vProdutoLargo(id, lado) {
   return `<div class="pdl ${lado ? 'lado' : ''}"><div class="pdf"><div class="pdfoto">${foto}</div>
     ${slots.length > 1 ? `<div class="strip">${slots.map((z, j) => `<button type="button" data-foto="${j}" class="${j === i ? 'on' : ''}" aria-label="Foto ${j + 1}"><img src="${z.full || z.th || ''}" alt=""></button>`).join('')}<span>Foto ${i + 1} de ${slots.length} · toque para ampliar</span></div>` : ''}</div>
    <div class="pdi">
-    <div class="hero"><div class="k">${esc([x.Time, x.Subcategoria].filter(Boolean).join(' · '))}</div><div class="v">${esc(p ? p.Projeto : 'Achado livre')}</div>
+    <div class="hero"><div class="k">${esc([x.Time, x.Subcategoria].filter(Boolean).join(' · '))}</div><div class="v">${esc(p ? p.Projeto : 'Produto livre')}</div>
      <button type="button" class="favb ${meu ? 'on' : ''}" data-fav="${esc(id)}" aria-label="${meu ? 'Tirar dos favoritos' : 'Marcar como favorito'}">${svgI(meu ? PATH.star : PATH.starO)}</button>
      <div class="g"><div><small>FOB</small><b class="num">${usd(fob)}</b></div><div><small>MOQ</small><b class="num">${x.MOQ !== '' && x.MOQ != null ? esc(x.MOQ) + ' pcs' : '<span class="todo">Não informado</span>'}</b></div>
-     <div><small>Interesse</small><b>${esc(x.Interesse || 'Não informado')}</b></div><div><small>Comparado aos outros achados</small>${comp}</div></div></div>
+     <div><small>Interesse</small><b>${esc(x.Interesse || 'Não informado')}</b></div><div><small>Comparado aos outros produtos</small>${comp}</div></div></div>
     ${fld('Fornecedor', f ? esc(f.Empresa) + (f.Estande ? ' · Estande ' + esc(f.Estande) : '') : '', f ? `data-forn="${esc(f.ID_Fornecedor)}" role="button"` : '')}
     ${fld('Anotações', esc(x.Anotacoes))}
     ${favs.length ? fld('Favorito de', esc(favs.map(nomeDe).join(', '))) : ''}
@@ -575,7 +575,7 @@ async function alternaFav(id) {
   await Promise.all([saveOutbox(), saveCore()]); render(); sync();
 }
 
-/* ---------- comparar achados ---------- */
+/* ---------- comparar produtos ---------- */
 function vComparar(pid) {
   const p = proj(pid); if (!p) return '<div class="vazio">Projeto não encontrado.</div>';
   const im = projImg(p); const ps = prodsDoProjeto(pid).slice().sort((a, b) => (num(a.FOB_USD) ?? 9e9) - (num(b.FOB_USD) ?? 9e9));
@@ -594,7 +594,7 @@ function vComparar(pid) {
       ${x.Anotacoes ? `<p>${esc(x.Anotacoes)}</p>` : ''}
       <small>${n ? n + ' página' + (n > 1 ? 's' : '') + ' no caderno' : 'Sem página no caderno'}</small>
       ${favs.length ? `<small class="fv">Favorito de ${esc(favs.map(nomeDe).join(', '))}</small>` : ''}</button></div>`; }).join('');
-  return `<div class="cmp">${ref}${cards || '<div class="vazio">Nenhum produto achado ainda.</div>'}</div>`;
+  return `<div class="cmp">${ref}${cards || '<div class="vazio">Nenhum produto ainda.</div>'}</div>`;
 }
 
 /* ---------- caderno do estande ---------- */
@@ -603,7 +603,7 @@ function vCaderno(sel) {
   gs.forEach((g) => { const d = String(g.Criada_Em || g.Data_Hora || '').slice(0, 10); (grupos[d] = grupos[d] || []).push(g); });
   const dia = (d) => { const m = d.match(/(\d{4})-(\d\d)-(\d\d)/); if (!m) return 'Sem data'; const dt = new Date(+m[1], m[2] - 1, +m[3]); return dt.toLocaleDateString('pt-BR', { weekday: 'long' }).replace('-feira', '') + ', ' + m[3] + '/' + m[2]; };
   const lista = `<button type="button" class="addp" data-go="novapag">Nova página</button>${Object.keys(grupos).sort().reverse().map((d) => `<div class="ghead">${esc(dia(d))}<span>${grupos[d].length}</span></div>${grupos[d].map((g) => { const f = forn(g.ID_Fornecedor); const x = g.ID_Produto && todosProdutos().find((p) => p.ID_Produto === g.ID_Produto); const pp = x && proj(x.ID_Projeto);
-    return `<button type="button" class="row pgrow" data-pag="${esc(g.ID_Pagina)}">${g.thumb ? `<img class="th pg" src="${g.thumb}" alt="">` : '<span class="th pg folhinha"></span>'}<div class="t"><div class="t1">${esc(tituloPag(g))}</div><div class="t2">${esc(f ? (f.Estande ? 'Estande ' + f.Estande : f.Empresa) : 'Sem fornecedor')}</div><div class="t2">${pp ? 'Ligada a ' + esc(pp.Projeto) : x ? 'Ligada a um achado livre' : 'Só no caderno'}${g._pend ? ' · na fila' : ''}</div></div></button>`; }).join('')}`).join('') || '<div class="empty">Nenhuma página ainda. Toque em Nova página para escrever e desenhar com a Pencil.</div>'}`;
+    return `<button type="button" class="row pgrow" data-pag="${esc(g.ID_Pagina)}">${g.thumb ? `<img class="th pg" src="${g.thumb}" alt="">` : '<span class="th pg folhinha"></span>'}<div class="t"><div class="t1">${esc(tituloPag(g))}</div><div class="t2">${esc(f ? (f.Estande ? 'Estande ' + f.Estande : f.Empresa) : 'Sem fornecedor')}</div><div class="t2">${pp ? 'Ligada a ' + esc(pp.Projeto) : x ? 'Ligada a um produto livre' : 'Só no caderno'}${g._pend ? ' · na fila' : ''}</div></div></button>`; }).join('')}`).join('') || '<div class="empty">Nenhuma página ainda. Toque em Nova página para escrever e desenhar com a Pencil.</div>'}`;
   const g = sel && gs.find((y) => y.ID_Pagina === sel);
   let det = '<div class="vazio">Escolha uma página ou crie uma nova.</div>';
   if (g) {
@@ -680,7 +680,7 @@ function ligarPagina(id) {
     const fs = todosFornecedores().filter((f) => String(f.Empresa).toLowerCase().includes(q.toLowerCase())).sort((a, b) => String(a.Empresa).localeCompare(String(b.Empresa)));
     const ps = todosProdutos().filter((x) => !fo || x.ID_Fornecedor === fo);
     el.querySelector('.fl').innerHTML = `<button type="button" class="op ${!fo ? 'on' : ''}" data-fo="">Nenhum fornecedor</button>` + fs.map((f) => `<button type="button" class="op ${fo === f.ID_Fornecedor ? 'on' : ''}" data-fo="${esc(f.ID_Fornecedor)}">${esc(f.Empresa)}${f.Estande ? `<small>Estande ${esc(f.Estande)}</small>` : ''}</button>`).join('');
-    el.querySelector('.pl').innerHTML = `<button type="button" class="op ${!pr ? 'on' : ''}" data-pr="">Nenhum produto</button>` + ps.map((x) => { const p = proj(x.ID_Projeto); return `<button type="button" class="op ${pr === x.ID_Produto ? 'on' : ''}" data-pr="${esc(x.ID_Produto)}">${esc(p ? p.Projeto : 'Achado livre · ' + (x.Subcategoria || ''))}<small>${usd(num(x.FOB_USD))}${forn(x.ID_Fornecedor) ? ' · ' + esc(forn(x.ID_Fornecedor).Empresa) : ''}</small></button>`; }).join('');
+    el.querySelector('.pl').innerHTML = `<button type="button" class="op ${!pr ? 'on' : ''}" data-pr="">Nenhum produto</button>` + ps.map((x) => { const p = proj(x.ID_Projeto); return `<button type="button" class="op ${pr === x.ID_Produto ? 'on' : ''}" data-pr="${esc(x.ID_Produto)}">${esc(p ? p.Projeto : 'Produto livre · ' + (x.Subcategoria || ''))}<small>${usd(num(x.FOB_USD))}${forn(x.ID_Fornecedor) ? ' · ' + esc(forn(x.ID_Fornecedor).Empresa) : ''}</small></button>`; }).join('');
   };
   el.innerHTML = `<div class="box"><div class="h">Título e ligação da página</div>
     <div class="lg2"><label class="lb2" for="lgT">Título</label><input id="lgT" value="${esc(g.Titulo || '')}" placeholder="${esc(tituloPag(Object.assign({}, g, { Titulo: '' })))}">
@@ -1155,7 +1155,7 @@ document.addEventListener('click', (e) => {
   if (a === 'anotar') { abreAnotar(); return; }
   if (a === 'toganot') { const v = baseLarga(); v.semAnot = !v.semAnot; render(); return; }
   if (a === 'novapag') { novaPagina(); return; }
-  if (a === 'novapagprod') { const x = todosProdutos().find((p) => p.ID_Produto === alvo()); if (x) { const p = proj(x.ID_Projeto); novaPagina({ ID_Produto: x.ID_Produto, ID_Fornecedor: x.ID_Fornecedor || '', Titulo: p ? p.Projeto : 'Achado livre' }); } return; }
+  if (a === 'novapagprod') { const x = todosProdutos().find((p) => p.ID_Produto === alvo()); if (x) { const p = proj(x.ID_Projeto); novaPagina({ ID_Produto: x.ID_Produto, ID_Fornecedor: x.ID_Fornecedor || '', Titulo: p ? p.Projeto : 'Produto livre' }); } return; }
   if (a === 'novapagforn') { const f = forn(alvo()); if (f) novaPagina({ ID_Fornecedor: f.ID_Fornecedor, Titulo: f.Empresa }); return; }
   if (a === 'ligarpag') { salvaPaginaJa(); ligarPagina(cur().sel); return; }
   if (a === 'delpag') { apagarPagina(cur().sel); return; }
