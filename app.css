@@ -374,3 +374,11 @@ button{cursor:pointer}
 }
 .pane.lista.estreita{width:280px}
 @media (max-width:1099px){.pane.lista.estreita{width:240px}}
+
+/* altura corrigida no iPhone instalado (ver ajustaAltura em app.js) */
+#app{height:var(--appH)}
+.formbar{bottom:calc(-1 * var(--gap, 0px))}
+.fab{bottom:calc(var(--bot) + 72px - var(--gap, 0px))}
+.largo .fab{bottom:calc(var(--bot) + 22px)}
+.toast{bottom:calc(var(--bot) + 140px - var(--gap, 0px))}
+.dd,.lb,.anot,.login,.veu,.painel{bottom:calc(-1 * var(--gap, 0px))}

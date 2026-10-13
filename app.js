@@ -3,6 +3,30 @@
 (function () {
 'use strict';
 const $ = (id) => document.getElementById(id);
+
+/* iPhone instalado: alguns iOS informam ao app uma altura menor que a tela (sobra uma faixa embaixo).
+   Só age no modo app instalado e só quando a diferença é a de uma barra (até 140 px). */
+const STANDALONE = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+function ajustaAltura() {
+  const r = document.documentElement;
+  const retrato = innerHeight >= innerWidth;
+  const alt = retrato ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+  const gap = alt - innerHeight;
+  if (STANDALONE() && gap > 0 && gap <= 140) { r.style.setProperty('--appH', alt + 'px'); r.style.setProperty('--gap', gap + 'px'); }
+  else { r.style.removeProperty('--appH'); r.style.removeProperty('--gap'); }
+}
+ajustaAltura();
+addEventListener('resize', () => setTimeout(ajustaAltura, 60));
+addEventListener('orientationchange', () => setTimeout(ajustaAltura, 300));
+function diagnostico() {
+  const cs = getComputedStyle(document.documentElement);
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;left:8px;right:8px;top:45%;z-index:99;background:rgba(0,0,0,.85);color:#fff;font:13px/1.5 monospace;padding:12px;border-radius:8px';
+  t.textContent = 'standalone=' + navigator.standalone + ' modo=' + (matchMedia('(display-mode: standalone)').matches ? 'app' : 'navegador') +
+    ' | tela=' + screen.width + 'x' + screen.height + ' | janela=' + innerWidth + 'x' + innerHeight +
+    ' | ajuste=' + (cs.getPropertyValue('--appH') || 'nenhum') + ' | v10';
+  document.body.appendChild(t); setTimeout(() => t.remove(), 12000);
+}
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const num = (v) => { const n = parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')); return isNaN(n) ? null : n; };
 const brl = (v) => (v == null || v === '' || isNaN(v)) ? '' : v >= 1e6 ? 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mi' : 'R$ ' + Math.round(v / 1e3).toLocaleString('pt-BR') + ' mil';
@@ -1080,6 +1104,7 @@ function mostraLogin(msg) {
 
 /* ================= início ================= */
 async function inicia() {
+  if (S.email === ADMIN && !window.__diag) { window.__diag = 1; setTimeout(diagnostico, 1200); }
   if (!S.projetos.length) {
     bar('Canton Fair 2026', false); $('nav').classList.add('hidden');
     $('scr').innerHTML = '<div class="load"><b>Preparando o roteiro</b>Baixando os projetos e as fotos da buylist para funcionar sem internet. Só acontece na primeira vez.</div>';
