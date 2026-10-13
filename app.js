@@ -190,7 +190,7 @@ function vTime(t) {
 function vProjeto(id) {
   const p = proj(id); if (!p) return '<div class="empty">Projeto não encontrado.</div>';
   const im = projImg(p); const ps = prodsDoProjeto(id).slice().sort((a, b) => (num(a.FOB_USD) || 9e9) - (num(b.FOB_USD) || 9e9));
-  return `<div class="split"><div class="sl"><div class="refwrap">${im ? `<img class="refimg" src="${im}" alt="Foto de referência">` : `<div class="refimg refnone">${I.img}Sem foto na buylist</div>`}${im ? '<span class="reftag">Foto da buylist</span>' : ''}</div></div><div class="sr">
+  return `<div class="split"><div class="sl"><div class="refwrap">${im ? `<button type="button" class="refbtn" data-refzoom="${esc(p.ID_Projeto)}"><img class="refimg" src="${im}" alt="Foto de referência"><span class="gzoom">${I.zoom}</span></button>` : `<div class="refimg refnone">${I.img}Sem foto na buylist</div>`}${im ? '<span class="reftag">Foto da buylist</span>' : ''}</div></div><div class="sr">
    <div class="hero"><div class="k">${esc([p.Time, p.Subcategoria, p.Tipo].filter(Boolean).join(' · '))}</div><div class="v">${esc(p.Projeto)}</div>
     <div class="g"><div><small>FOB alvo</small>${p.FOB_Alvo ? `<b class="num">${esc(p.FOB_Alvo)}</b>` : '<span class="todo">A preencher</span>'}</div>
     <div><small>MOQ alvo</small>${p.MOQ_Alvo !== '' && p.MOQ_Alvo != null ? `<b class="num">${esc(p.MOQ_Alvo)} pcs</b>` : '<span class="todo">A preencher</span>'}</div>
@@ -300,17 +300,16 @@ function novoForm(projId, time) {
 function vForm() {
   const f = st.form; const p = f.proj ? proj(f.proj) : null; const s = f.forn ? forn(f.forn) : null;
   const subs = f.time ? [...new Set(S.projetos.filter((x) => x.Time === f.time).map((x) => x.Subcategoria))].sort() : [];
-  const sugg = (!f.fixed && f.time && f.sub) ? S.projetos.filter((x) => x.Time === f.time && x.Subcategoria === f.sub) : [];
   return `<div class="form">
   <div class="fi"><span class="lab">Fotos do produto</span><div class="imgf">${[0, 1, 2, 3].map((k) => { const tem = f.th[k] || f.tem[k];
     return `<div class="slot"><label class="imgbtn ${k === 0 && !tem ? 'first' : ''}">${f.th[k] ? `<img src="${f.th[k]}" alt="">` : f.tem[k] ? I.img + 'Foto salva' : I.cam + (k === 0 ? 'Foto' : '+')}<input type="file" accept="image/*" capture="environment" data-ph="${k}" hidden></label>${tem ? `<button type="button" class="rm" data-rm="${k}" aria-label="Tirar foto">${I.x}</button>` : ''}</div>`; }).join('')}</div>
    ${f.edit ? '<div class="hint">Toque numa foto para trocar, ou no x para tirar.</div>' : ''}</div>
   ${f.fixed ? `<div class="fi"><span class="lab">Projeto da buylist</span><div class="ro">${esc(p.Projeto)}<small>${esc(p.Time)} · ${esc(p.Subcategoria)}${p.FOB_Alvo ? ' · alvo ' + esc(p.FOB_Alvo) : ''}</small></div></div>` : `
   <div class="fi"><span class="lab req">Time</span><div class="enum">${timesOrdenados().map((t) => `<button type="button" data-ftime="${esc(t)}" aria-pressed="${f.time === t}">${esc(t)}</button>`).join('')}</div></div>
-  ${f.time ? `<div class="fi"><span class="lab req">Subcategoria</span><div class="enum">${subs.map((x) => `<button type="button" data-fsub="${esc(x)}" aria-pressed="${f.sub === x}">${esc(x)}</button>`).join('')}</div></div>` : ''}
-  ${sugg.length ? `<div class="fi"><span class="lab">Atende algum projeto da buylist?</span><div class="sugg">${sugg.map((x) => `<button type="button" data-fproj="${esc(x.ID_Projeto)}" aria-pressed="${f.proj === x.ID_Projeto}">${esc(x.Projeto)}<small>${x.FOB_Alvo ? 'alvo ' + esc(x.FOB_Alvo) : ''}</small></button>`).join('')}<button type="button" data-fproj="" aria-pressed="${!!f.sub && !f.proj}">Nenhum, é um achado novo</button></div></div>` : ''}`}
+  ${f.time ? `<div class="fi"><span class="lab">Subcategoria</span><div class="enum">${subs.map((x) => `<button type="button" data-fsub="${esc(x)}" aria-pressed="${f.sub === x}">${esc(x)}</button>`).join('')}</div></div>` : ''}
+  ${f.proj && proj(f.proj) ? `<div class="fi"><span class="lab">Projeto da buylist</span><div class="ro">${esc(proj(f.proj).Projeto)}</div></div>` : ''}`}
   <div class="fi"><span class="lab req">Fornecedor</span><button type="button" class="sel ${s ? '' : 'ph'}" data-go="dd">${s ? esc(s.Empresa) : 'Escolher ou criar novo'}${I.down}</button></div>
-  <div class="fi"><label for="fFob" class="req">FOB (USD)</label><input id="fFob" inputmode="decimal" value="${esc(f.fob)}" placeholder="0,00" autocomplete="off"><div class="delta" id="dl">${deltaTxt()}</div></div>
+  <div class="fi"><label for="fFob">FOB (USD)</label><input id="fFob" inputmode="decimal" value="${esc(f.fob)}" placeholder="0,00" autocomplete="off"><div class="delta" id="dl">${deltaTxt()}</div></div>
   <div class="fi"><label for="fMoq">MOQ (pcs)</label><input id="fMoq" inputmode="numeric" value="${esc(f.moq)}" placeholder="0" autocomplete="off"></div>
   <div class="fi"><span class="lab">Interesse</span><div class="enum">${['Alto', 'Médio', 'Baixo'].map((x) => `<button type="button" data-fint="${x}" aria-pressed="${f.int === x}">${x}</button>`).join('')}</div></div>
   <div class="fi"><label for="fNote">Anotações</label><textarea id="fNote" placeholder="MOQ por cor, material, prazo…">${esc(f.nota)}</textarea><div class="hint">Dá para ditar pelo microfone do teclado.</div></div>
@@ -581,7 +580,7 @@ function vComparar(pid) {
   const p = proj(pid); if (!p) return '<div class="vazio">Projeto não encontrado.</div>';
   const im = projImg(p); const ps = prodsDoProjeto(pid).slice().sort((a, b) => (num(a.FOB_USD) ?? 9e9) - (num(b.FOB_USD) ?? 9e9));
   const pags = paginasTodas();
-  const ref = `<div class="cd ref">${im ? `<img class="cimg" src="${im}" alt="Referência da buylist">` : `<div class="cimg gph">${I.img}</div>`}<div class="bd">
+  const ref = `<div class="cd ref">${im ? `<img class="cimg" src="${im}" alt="Referência da buylist" data-refzoom="${esc(p.ID_Projeto)}" style="cursor:zoom-in">` : `<div class="cimg gph">${I.img}</div>`}<div class="bd">
     <div class="k2">REFERÊNCIA BUYLIST</div><div class="v2">${esc(p.Projeto)}</div>
     <div><small>FOB alvo</small>${p.FOB_Alvo ? `<b>${esc(p.FOB_Alvo)}</b>` : '<i>A preencher</i>'}</div><div><small>MOQ alvo</small>${p.MOQ_Alvo !== '' && p.MOQ_Alvo != null ? `<b>${esc(p.MOQ_Alvo)}</b>` : '<i>A preencher</i>'}</div>
     <div><small>CMV 12M</small><b>${num(p.CMV_12M) ? brl(num(p.CMV_12M)) : 'Sem dado'}</b></div><div><small>SKUs</small><b>${p.SKUs !== '' && p.SKUs != null ? esc(p.SKUs) : 'Sem dado'}</b></div></div></div>`;
@@ -771,13 +770,11 @@ async function reduz(src, max, q) {
 let emEnvio = null; // id do registro que está subindo agora
 const ocupado = (id) => { if (emEnvio === id) { toast('Este registro está sendo enviado agora. Tente de novo em alguns segundos.'); return true; } return false; };
 function camposForm(f) {
-  return { ID_Projeto: f.proj || '', ID_Fornecedor: f.forn, Time: f.time, Subcategoria: f.sub, FOB_USD: num(f.fob), MOQ: num(f.moq) == null ? '' : num(f.moq), Interesse: f.int || '', Anotacoes: f.nota.trim() };
+  return { ID_Projeto: f.proj || '', ID_Fornecedor: f.forn, Time: f.time || '', Subcategoria: f.sub || '', FOB_USD: num(f.fob) == null ? '' : num(f.fob), MOQ: num(f.moq) == null ? '' : num(f.moq), Interesse: f.int || '', Anotacoes: f.nota.trim() };
 }
 function validaForm(f) {
   if (!f.fixed && !f.time) return 'Escolha o time.';
-  if (!f.fixed && !f.sub) return 'Escolha a subcategoria.';
   if (!f.forn) return 'Escolha ou crie o fornecedor.';
-  if (num(f.fob) == null) return 'Preencha o FOB em dólar.';
   return '';
 }
 async function salvarProduto() {
@@ -1134,6 +1131,7 @@ document.addEventListener('click', (e) => {
     if (LARGO()) { const p = proj(id); if (cur().v === 'time' && p && p.Time === cur().time) selec(id); else if (p) go({ v: 'time', time: p.Time, sel: id }); return; }
     go({ v: 'projeto', id }); return; }
   if ((el = e.target.closest('[data-rm]'))) { keep(); const k = +el.dataset.rm; const f = st.form; f.ph[k] = ''; f.th[k] = ''; f.tem[k] = false; f.mud[k] = true; render($('scr').scrollTop); return; }
+  if ((el = e.target.closest('[data-refzoom]'))) { const p = proj(el.dataset.refzoom); const im = p && projImg(p); if (im) abreLb([im], 0); return; }
   if ((el = e.target.closest('[data-zoom]'))) {
     const imgs = galAtual.filter(Boolean); const i = galAtual.slice(0, +el.dataset.zoom).filter(Boolean).length;
     if ($('anotov') && LARGO()) { // desenho visível: a foto ampliada já vem com a anotação

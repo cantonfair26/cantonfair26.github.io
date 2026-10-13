@@ -379,3 +379,4 @@ button{cursor:pointer}
 html.curto{--bot:0px;background:#fff}
 html.curto body{background:#fff}
 html.curto.nologin,html.curto.nologin body{background:var(--tiffany)}
+.refbtn{display:block;width:100%;padding:0;border:0;background:none;position:relative;cursor:zoom-in}
