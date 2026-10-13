@@ -379,3 +379,4 @@ button{cursor:pointer}
 html.curto{--bot:0px;background:#fff}
 html.curto body{background:#fff}
 html.curto.nologin,html.curto.nologin body{background:var(--tiffany)}
+html.curto .bar{padding-top:calc(var(--top) + 18px);min-height:calc(var(--top) + 68px)}
