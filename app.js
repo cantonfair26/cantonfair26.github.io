@@ -270,8 +270,12 @@ function vFornecedores() {
   const fs = todosFornecedores().slice().sort((a, b) => String(a.Empresa).localeCompare(String(b.Empresa)));
   if (!fs.length) return '<div class="empty">Nenhum fornecedor ainda. Eles entram aqui quando você registra um produto e cria o fornecedor.</div>' + fab();
   const ps = todosProdutos();
-  return `<div class="gallery">${fs.map((f) => { const n = ps.filter((p) => p.ID_Fornecedor === f.ID_Fornecedor).length; const im = f.thumb || '';
-    return `<button class="gcard" data-forn="${esc(f.ID_Fornecedor)}">${im ? `<img class="im" src="${im}" alt="">` : `<div class="im">${I.store}</div>`}<div class="c"><b>${esc(f.Empresa)}</b><span>${n} produto${n !== 1 ? 's' : ''}${f.Contato ? ' · ' + esc(f.Contato) : ''}${f._pend ? ' · na fila' : ''}</span></div></button>`; }).join('')}</div><div style="height:90px"></div>${fab()}`;
+  const rows = fs.map((f) => { const meus = ps.filter((p) => p.ID_Fornecedor === f.ID_Fornecedor); const n = meus.length;
+    const times = [...new Set(meus.map((p) => p.Time).filter(Boolean))].join(', ');
+    const l3 = [f.Contato, f.Estande ? 'estande ' + f.Estande : ''].filter(Boolean).map(esc).join(' · ');
+    return `<button class="row" data-forn="${esc(f.ID_Fornecedor)}">${f.thumb ? `<img class="th" src="${f.thumb}" alt="">` : `<div class="th">${I.store}</div>`}<div class="t"><div class="t1">${esc(f.Empresa || 'Fornecedor sem nome')}</div>
+   <div class="t2">${n} produto${n !== 1 ? 's' : ''}${times ? ' · ' + esc(times) : ''}</div>${l3 ? `<div class="t2">${l3}</div>` : ''}${f._pend ? '<span class="chip fila">Na fila</span>' : ''}</div></button>`; }).join('');
+  return `<div class="ghead">Fornecedores<span>${fs.length}</span></div><div class="list">${rows}</div><div style="height:90px"></div>${fab()}`;
 }
 function vFornecedor(id) {
   const f = forn(id); if (!f) return '<div class="empty">Fornecedor não encontrado. Ele pode ter sido apagado.</div>';
