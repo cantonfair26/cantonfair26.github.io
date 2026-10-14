@@ -153,7 +153,7 @@ function refreshBar() { const v = cur(); render.lastBar && bar(render.lastBar[0]
 
 /* ================= telas ================= */
 function projRow(p, cont) {
-  const n = cont[p.ID_Projeto] || 0; const im = projImg(p);
+  const n = cont[p.ID_Projeto] || 0; const im = projImg(p) || projCapa(p);
   return `<button class="row" data-proj="${esc(p.ID_Projeto)}">${im ? `<img class="th" src="${im}" alt="">` : ph('th')}<div class="t"><div class="t1">${esc(p.Projeto)}</div>
    <div class="t2">${esc([p.Tipo, p['Coleção']].filter(Boolean).join(' · ') || p.Subcategoria)}</div>
    <span class="cnt ${n ? 'has' : ''}">${n} produto${n !== 1 ? 's' : ''} na feira</span>${p.Origem === 'Control Chart 2027' ? '<span class="nobl">Control Chart 2027</span>' : ''}</div>
@@ -1039,7 +1039,7 @@ async function sync(manual, completo) {
       if (r.paginas) S.paginas = r.paginas;
       if (r.anotacoes) S.anotacoes = r.anotacoes;
       S.agora = r.agora; await saveCore();
-      if (!S.img || !S.img.app || !S.img.app.capa || S.img.capasV === undefined) { try { await baixaImagens(); mudou = true; } catch (e) {} }
+      if (!S.img || !S.img.app || !S.img.app.capa || S.img.capasV === undefined || (await kvGet('imgRev')) !== IMG_REV) { try { await baixaImagens(); await kvSet('imgRev', IMG_REV); mudou = true; } catch (e) {} }
     }
   } catch (e) {
     if (e instanceof LoginErr) { S.token = null; await kvSet('token', null); mostraLogin('Sua sessão expirou. Entre de novo: os registros guardados no celular não se perdem.'); }
@@ -1050,6 +1050,7 @@ async function sync(manual, completo) {
     if (mudou && v !== 'form' && v !== 'novoforn' && !lb) render($('scr').scrollTop); else refreshBar();
   }
 }
+const IMG_REV = 2; // sobe quando entram capas novas no Drive: cada aparelho baixa o pacote uma vez
 async function baixaImagens() { const r = await api('imagens', {}); S.img = r.pacote; await kvSet('img', S.img); }
 
 /* ================= login ================= */
