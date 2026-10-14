@@ -119,6 +119,8 @@ async function api(acao, body) {
 const imgKey = (path) => String(path || '').split('/').pop().replace(/\.\w+$/, '');
 function proj(id) { return S.projetos.find((p) => p.ID_Projeto === id); }
 function projImg(p) { return p && S.img && S.img.projetos[imgKey(p.Foto_Referencia)] || ''; }
+// capa: colagem de referências da buylist (tela do projeto, comparar e ampliar); a foto simples fica para as miniaturas
+function projCapa(p) { return p && S.img && S.img.capas && S.img.capas[p.ID_Projeto] || projImg(p); }
 function timesOrdenados() { return S.times.slice().sort((a, b) => (a.Ordem || 0) - (b.Ordem || 0)).map((t) => t.Time); }
 function todosProdutos() {
   const pend = S.outbox.filter((o) => o.kind === 'prod').map((o) => Object.assign({}, o.payload, { _pend: true }));
@@ -190,7 +192,7 @@ function vTime(t) {
 }
 function vProjeto(id) {
   const p = proj(id); if (!p) return '<div class="empty">Projeto não encontrado.</div>';
-  const im = projImg(p); const ps = prodsDoProjeto(id).slice().sort((a, b) => (num(a.FOB_USD) || 9e9) - (num(b.FOB_USD) || 9e9));
+  const im = projCapa(p); const ps = prodsDoProjeto(id).slice().sort((a, b) => (num(a.FOB_USD) || 9e9) - (num(b.FOB_USD) || 9e9));
   return `<div class="split"><div class="sl"><div class="refwrap">${im ? `<button type="button" class="refbtn" data-refzoom="${esc(p.ID_Projeto)}"><img class="refimg" src="${im}" alt="Foto de referência"><span class="gzoom">${I.zoom}</span></button>` : `<div class="refimg refnone">${I.img}Sem foto na buylist</div>`}${im ? '<span class="reftag">Foto da buylist</span>' : ''}</div></div><div class="sr">
    <div class="hero"><div class="k">${esc([p.Time, p.Subcategoria, p.Tipo].filter(Boolean).join(' · '))}</div><div class="v">${esc(p.Projeto)}</div>
     <div class="g"><div><small>FOB alvo</small>${p.FOB_Alvo ? `<b class="num">${esc(p.FOB_Alvo)}</b>` : '<span class="todo">A preencher</span>'}</div>
@@ -583,7 +585,7 @@ async function alternaFav(id) {
 /* ---------- comparar produtos ---------- */
 function vComparar(pid) {
   const p = proj(pid); if (!p) return '<div class="vazio">Projeto não encontrado.</div>';
-  const im = projImg(p); const ps = prodsDoProjeto(pid).slice().sort((a, b) => (num(a.FOB_USD) ?? 9e9) - (num(b.FOB_USD) ?? 9e9));
+  const im = projCapa(p); const ps = prodsDoProjeto(pid).slice().sort((a, b) => (num(a.FOB_USD) ?? 9e9) - (num(b.FOB_USD) ?? 9e9));
   const pags = paginasTodas();
   const ref = `<div class="cd ref">${im ? `<img class="cimg" src="${im}" alt="Referência da buylist" data-refzoom="${esc(p.ID_Projeto)}" style="cursor:zoom-in">` : `<div class="cimg gph">${I.img}</div>`}<div class="bd">
     <div class="k2">REFERÊNCIA BUYLIST</div><div class="v2">${esc(p.Projeto)}</div>
@@ -1037,7 +1039,7 @@ async function sync(manual, completo) {
       if (r.paginas) S.paginas = r.paginas;
       if (r.anotacoes) S.anotacoes = r.anotacoes;
       S.agora = r.agora; await saveCore();
-      if (!S.img || !S.img.app || !S.img.app.capa) { try { await baixaImagens(); mudou = true; } catch (e) {} }
+      if (!S.img || !S.img.app || !S.img.app.capa || S.img.capasV === undefined) { try { await baixaImagens(); mudou = true; } catch (e) {} }
     }
   } catch (e) {
     if (e instanceof LoginErr) { S.token = null; await kvSet('token', null); mostraLogin('Sua sessão expirou. Entre de novo: os registros guardados no celular não se perdem.'); }
@@ -1136,7 +1138,7 @@ document.addEventListener('click', (e) => {
     if (LARGO()) { const p = proj(id); if (cur().v === 'time' && p && p.Time === cur().time) selec(id); else if (p) go({ v: 'time', time: p.Time, sel: id }); return; }
     go({ v: 'projeto', id }); return; }
   if ((el = e.target.closest('[data-rm]'))) { keep(); const k = +el.dataset.rm; const f = st.form; f.ph[k] = ''; f.th[k] = ''; f.tem[k] = false; f.mud[k] = true; render($('scr').scrollTop); return; }
-  if ((el = e.target.closest('[data-refzoom]'))) { const p = proj(el.dataset.refzoom); const im = p && projImg(p); if (im) abreLb([im], 0); return; }
+  if ((el = e.target.closest('[data-refzoom]'))) { const p = proj(el.dataset.refzoom); const im = p && projCapa(p); if (im) abreLb([im], 0); return; }
   if ((el = e.target.closest('[data-zoom]'))) {
     const imgs = galAtual.filter(Boolean); const i = galAtual.slice(0, +el.dataset.zoom).filter(Boolean).length;
     if ($('anotov') && LARGO()) { // desenho visível: a foto ampliada já vem com a anotação
