@@ -174,7 +174,7 @@ function vVisao() {
    </div>
    <div class="g2">
     <section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="h3">Cobertura por time</h2><a href="#/cobertura" style="font-size:13.5px">Ver por subcategoria</a></div>
-     <div class="sub" style="margin-bottom:18px">Projetos da buylist com pelo menos um produto coletado. Ao lado, quanto do CMV 12M do time já tem opção.</div><div style="display:flex;flex-direction:column;gap:18px">${barras}</div></section>
+     <div class="sub" style="margin-bottom:18px">Projetos da buylist com pelo menos um produto coletado. Ao lado, quanto do CMV do time já tem opção.</div><div style="display:flex;flex-direction:column;gap:18px">${barras}</div></section>
     <section class="card"><h2 class="h3">FOB Target</h2><div class="sub" style="margin-bottom:16px">Melhor FOB de cada projeto comparado ao FOB Target da buylist.</div>
      <div class="stk" role="img" aria-label="${stt.ok} dentro do target, ${stt.up} acima, ${stt.no} sem target">${stt.ok ? `<div style="flex:${stt.ok};background:#2E7D32"></div>` : ''}${stt.up ? `<div style="flex:${stt.up};background:#E65100"></div>` : ''}${stt.no ? `<div style="flex:${stt.no};background:#D9D3CC"></div>` : ''}${!atend.size ? '<div style="flex:1;background:#EEEAE5"></div>' : ''}</div>
      <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px">
