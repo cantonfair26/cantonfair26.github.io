@@ -167,7 +167,8 @@ function vHome() {
     const ps = S.projetos.filter((p) => p.Time === t); const feitos = ps.filter((p) => cont[p.ID_Projeto]).length;
     const tt = S.times.find((x) => x.Time === t); const im = S.img && S.img.app[imgKey(tt && tt.Foto_Card)];
     const subs = new Set(ps.map((p) => p.Subcategoria)).size; const ach = prods.filter((p) => p.Time === t).length;
-    return `<button class="tile" data-time="${esc(t)}">${im ? `<img src="${im}" alt="${esc(t)}">` : `<img alt="${esc(t)}">`}
+    const cmv = ps.reduce((acc, p) => acc + (num(p.CMV_12M) || 0), 0);
+    return `<button class="tile" data-time="${esc(t)}"><div class="tw">${im ? `<img src="${im}" alt="${esc(t)}">` : `<img alt="${esc(t)}">`}<div class="tcap"><b>${esc(t)}</b><span>${ps.length} projeto${ps.length !== 1 ? 's' : ''}${cmv ? ' · ' + brl(cmv) : ''}</span></div></div>
      <div class="prog"><i style="width:${ps.length ? Math.round(feitos / ps.length * 100) : 0}%"></i></div>
      <div class="mini"><span>${ach} produto${ach !== 1 ? 's' : ''}</span><span>${subs} subcategorias</span></div></button>`;
   }).join('');

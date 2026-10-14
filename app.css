@@ -380,3 +380,10 @@ html.curto{--bot:0px;background:#fff}
 html.curto body{background:#fff}
 html.curto.nologin,html.curto.nologin body{background:var(--tiffany)}
 .refbtn{display:block;width:100%;padding:0;border:0;background:none;position:relative;cursor:zoom-in}
+
+/* card do time: a foto traz o texto antigo gravado na parte de baixo; ela é recortada e o texto vem do app, sempre atualizado */
+.tile .tw{position:relative;aspect-ratio:1;overflow:hidden;border-radius:10px;background:#E8E3DC}
+.tile .tw img{position:absolute;top:0;left:-16.7%;width:133.4%;height:auto;aspect-ratio:1;max-width:none;border-radius:0;object-fit:cover}
+.tile .tcap{position:absolute;left:0;right:0;bottom:0;padding:34px 12px 10px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.62));color:#fff;display:flex;flex-direction:column;gap:2px}
+.tile .tcap b{font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-weight:600;font-size:28px;line-height:1}
+.tile .tcap span{font-size:12.5px;font-weight:500}
