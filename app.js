@@ -197,7 +197,7 @@ function vProjeto(id) {
    <div class="hero"><div class="k">${esc([p.Time, p.Subcategoria, p.Tipo].filter(Boolean).join(' · '))}</div><div class="v">${esc(p.Projeto)}</div>
     <div class="g"><div><small>FOB alvo</small>${p.FOB_Alvo ? `<b class="num">${esc(p.FOB_Alvo)}</b>` : '<span class="todo">A preencher</span>'}</div>
     <div><small>MOQ alvo</small>${p.MOQ_Alvo !== '' && p.MOQ_Alvo != null ? `<b class="num">${esc(p.MOQ_Alvo)} pcs</b>` : '<span class="todo">A preencher</span>'}</div>
-    <div><small>CMV 12M</small><b class="num">${num(p.CMV_12M) ? brl(num(p.CMV_12M)) : 'Sem dado'}</b></div><div><small>SKUs</small><b class="num">${p.SKUs !== '' && p.SKUs != null ? esc(p.SKUs) : 'Sem dado'}</b></div></div></div>
+    <div><small>CMV</small><b class="num">${num(p.CMV_12M) ? brl(num(p.CMV_12M)) : 'Sem dado'}</b></div><div><small>SKUs</small><b class="num">${p.SKUs !== '' && p.SKUs != null ? esc(p.SKUs) : 'Sem dado'}</b></div></div></div>
    ${LARGO() && ps.length > 1 ? `<div class="duas"><button class="addp" data-go="novoproj">Adicionar produto encontrado</button><button class="addp out" data-go="comparar">Comparar os ${ps.length} produtos</button></div>` : '<button class="addp" data-go="novoproj">Adicionar produto encontrado</button>'}
    <div class="sec">Produtos encontrados na feira<span>${ps.length}</span></div>
    ${ps.map((x, i) => rowProduto(x, { semProjeto: true, melhor: i === 0 && ps.length > 1 })).join('') || '<div class="empty">Nenhum ainda.</div>'}<div style="height:24px"></div></div></div>`;
@@ -590,7 +590,7 @@ function vComparar(pid) {
   const ref = `<div class="cd ref">${im ? `<img class="cimg" src="${im}" alt="Referência da buylist" data-refzoom="${esc(p.ID_Projeto)}" style="cursor:zoom-in">` : `<div class="cimg gph">${I.img}</div>`}<div class="bd">
     <div class="k2">REFERÊNCIA BUYLIST</div><div class="v2">${esc(p.Projeto)}</div>
     <div><small>FOB alvo</small>${p.FOB_Alvo ? `<b>${esc(p.FOB_Alvo)}</b>` : '<i>A preencher</i>'}</div><div><small>MOQ alvo</small>${p.MOQ_Alvo !== '' && p.MOQ_Alvo != null ? `<b>${esc(p.MOQ_Alvo)}</b>` : '<i>A preencher</i>'}</div>
-    <div><small>CMV 12M</small><b>${num(p.CMV_12M) ? brl(num(p.CMV_12M)) : 'Sem dado'}</b></div><div><small>SKUs</small><b>${p.SKUs !== '' && p.SKUs != null ? esc(p.SKUs) : 'Sem dado'}</b></div></div></div>`;
+    <div><small>CMV</small><b>${num(p.CMV_12M) ? brl(num(p.CMV_12M)) : 'Sem dado'}</b></div><div><small>SKUs</small><b>${p.SKUs !== '' && p.SKUs != null ? esc(p.SKUs) : 'Sem dado'}</b></div></div></div>`;
   const cards = ps.map((x, i) => { const f = forn(x.ID_Fornecedor); const favs = favoritosDe(x); const meu = favs.includes(S.email); const n = pags.filter((g) => g.ID_Produto === x.ID_Produto).length;
     const c = FOTOS[x.ID_Produto]; const src = (x._pend && x.fotos && x.fotos[0]) || (c && c.f && c.f.find(Boolean)) || x.thumb;
     return `<div class="cd ${meu ? 'meu' : ''}"><div class="cph">${src ? `<img class="cimg" src="${src}" alt="">` : `<div class="cimg gph">${I.img}</div>`}${i === 0 && ps.length > 1 && num(x.FOB_USD) != null ? '<span class="tag">Melhor FOB</span>' : ''}
