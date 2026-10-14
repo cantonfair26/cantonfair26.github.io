@@ -143,9 +143,10 @@ function imagens(d) {
   fs = DriveApp.getFolderById(CFG.IMG_PROJ).getFiles();
   while (fs.hasNext()) { const f = fs.next(); pacote.projetos[f.getName().replace(/\.\w+$/, '')] = b64(f); }
   // capas: colagem de referências da buylist por projeto (pasta Capas_Projetos dentro da pasta do app)
-  const pc = pasta.getFoldersByName('Capas_Projetos');
-  if (pc.hasNext()) { const cf = pc.next().getFiles(); while (cf.hasNext()) { const f = cf.next(); if (/^P\d+\.\w+$/.test(f.getName())) { pacote.capas[f.getName().replace(/\.\w+$/, '')] = b64(f); pacote.capasV++; } } }
-  pasta.createFile('cf26_pacote_imagens_v2.json', JSON.stringify(pacote), 'application/json');
+  // (lê também subpastas, caso a pasta tenha sido enviada dentro de outra com o mesmo nome)
+  const lerCapas = (pc) => { const cf = pc.getFiles(); while (cf.hasNext()) { const f = cf.next(); if (/^P\d+\.\w+$/.test(f.getName())) { pacote.capas[f.getName().replace(/\.\w+$/, '')] = b64(f); pacote.capasV++; } } const sub = pc.getFolders(); while (sub.hasNext()) lerCapas(sub.next()); };
+  const pcs = pasta.getFoldersByName('Capas_Projetos'); while (pcs.hasNext()) lerCapas(pcs.next());
+  if (pacote.capasV) pasta.createFile('cf26_pacote_imagens_v2.json', JSON.stringify(pacote), 'application/json');
   return { ok: true, pacote: pacote };
 }
 
