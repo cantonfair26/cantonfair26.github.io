@@ -6,6 +6,7 @@ const $ = (id) => document.getElementById(id);
 
 /* iPhone instalado: algumas versões do iOS entregam ao app uma área 59 px menor que a tela e deixam uma faixa
    embaixo onde não dá para desenhar. Nesse caso a faixa recebe a cor do menu, para parecer parte dele. */
+const IOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const STANDALONE = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 function ajustaAltura() {
   const retrato = innerHeight >= innerWidth;
@@ -1093,7 +1094,23 @@ function mostraLogin(msg) {
     loginEl.querySelector('#lgB').onclick = entrar;
     loginEl.querySelector('#lgC').oninput = (e) => { if (e.target.value.trim().length === 6) entrar(); };
   };
-  passo1(); document.body.appendChild(loginEl);
+  const passo0 = () => {
+    loginEl.innerHTML = `<div class="k">WESTWING · GUANGZHOU</div><div class="rule"></div><h1>Canton Fair</h1><div class="y">2026</div>
+     <p><b>Instale o app</b></p>
+     <div class="passos">
+      <div class="passo"><span class="n">1</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9H6.5A1.5 1.5 0 0 0 5 10.5v9A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 17.5 9H16"/><path d="M12 14V3M8.5 6.5 12 3l3.5 3.5"/></svg></span>
+       <span class="tx">Toque em <b>Compartilhar</b> no Safari<small>Nos iPhones mais novos, fica dentro do menu ···</small></span></div>
+      <div class="passo"><span class="n">2</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#262422" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M12 8.5v7M8.5 12h7"/></svg></span>
+       <span class="tx">Escolha <b>Adicionar à Tela de Início</b></span></div>
+      <div class="passo"><span class="n">3</span><span class="ic"><img src="icons/icon-180.png" alt=""></span>
+       <span class="tx">Abra pelo <b>ícone novo</b> e entre com seu e-mail Westwing</span></div>
+     </div>
+     <button class="lnk" id="lgN">Continuar no navegador</button>`;
+    loginEl.querySelector('#lgN').onclick = () => { try { sessionStorage.setItem('cf26nav', '1'); } catch (e) {} passo1(); };
+  };
+  let nav = false; try { nav = sessionStorage.getItem('cf26nav') === '1'; } catch (e) {}
+  if (!msg && IOS() && !STANDALONE() && !nav) passo0(); else passo1();
+  document.body.appendChild(loginEl);
 }
 
 /* ================= início ================= */
